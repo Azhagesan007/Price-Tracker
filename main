@@ -1,0 +1,44 @@
+import requests
+from bs4 import BeautifulSoup
+import smtplib
+
+maiil_password = "Your Passwoed"
+
+url = "https://www.amazon.in/Redmi-Chrome-Silver-Dimensity-5000mAh/dp/B0BBFKYH4N/"
+hearders = {
+    "User-Agent": "en-US,en;q=0.9,ta;q=0.8",
+    "Accept-Language": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/"
+                       "109.0.0.0 Safari/537.36",
+}
+
+charec = ".,"
+response = requests.get(url=url, headers=hearders)
+
+data = response.text
+
+soup = BeautifulSoup(data, "html.parser")
+
+price_with_symbol = soup.find(name="span", class_="a-price-whole")
+
+price = price_with_symbol.text
+product_title = soup.find(name="span", id="productTitle")
+for i in charec:
+    price = price.replace(i, "")
+price = int(price)
+product = product_title.getText().strip()
+
+
+
+if price < 14000:
+    mail_response = smtplib.SMTP("smtp.gmail.com")
+
+    mail_response.starttls()
+    mail_response.login(user="Your mail@gmail.com", password=maiil_password)
+    mail_response.sendmail(from_addr="Your mail@gmail.com",
+                           to_addrs="Your mail@gmail.com",
+                           msg=f"Subject:Price alert for the {product}\n\nThe price of {product} is {price} now. Its "
+                               f"is below your alert price."
+                           )
+    mail_response.close()
+    print("Mail sent........")
+
